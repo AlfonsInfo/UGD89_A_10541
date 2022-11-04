@@ -22,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import java.lang.Math.sqrt
 
 class MainActivity : AppCompatActivity(), SensorEventListener  {
     //Camera
@@ -33,6 +34,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
     lateinit var sensorManager : SensorManager
     private val CHANNEL_ID_1 = "channel_notification_01"
     private val notificationId1 = 101
+    //Acce
+    private var acceleration = 0f
+    private var currentAcceleration = 0f
+    private var lastAcceleration = 0f
 
 
     lateinit var sensorStatusTV: TextView
@@ -145,19 +150,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            //Log.d("Main", "onSensorChanged: sides ${event.values[0]}
-            //front/back ${event.values[1]} ")
-            // Sides = Tilting phone left(10) and right(-10)
-            val sides = event.values[0]
-            val upDown = event.values[1]
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+            lastAcceleration = currentAcceleration
 
+            // Getting current accelerations
+            // with the help of fetched x,y,z values
+            currentAcceleration = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+            val delta: Float = currentAcceleration - lastAcceleration
+            acceleration = acceleration * 0.9f + delta
 
-
-
-            if (!(upDown.toInt() == 0 && sides.toInt() == 0))
-            {
-                Log.d("Test", "Masuk If" )
-                sendNotification()
+            // Display a Toast message if
+            // acceleration value is over 12
+            if (acceleration > 12) {
+              sendNotification()
             }
 
         }
